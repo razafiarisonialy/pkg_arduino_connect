@@ -15,46 +15,27 @@ void setCouleur(bool rouge, bool vert, bool bleu) {
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   pinMode(PIN_ROUGE, OUTPUT);
   pinMode(PIN_VERT, OUTPUT);
   pinMode(PIN_BLEU, OUTPUT);
 
-  eteindreTout(); // sécurité au démarrage
+  eteindreTout();
 }
 
 void loop() {
-
-  setCouleur(true, true, true);
   if (Serial.available() > 0) {
-
     String command = Serial.readStringUntil('\n');
     command.trim();
 
-    if (command == "ROUGE") {
-      setCouleur(true, false, false);
-    }
-    else if (command == "VERT") {
-      setCouleur(false, true, false);
-    }
-    else if (command == "BLEU") {
-      setCouleur(false, false, true);
-    }
-    else if (command == "JAUNE") {
-      setCouleur(true, true, false);
-    }
-    else if (command == "CYAN") {
-      setCouleur(false, true, true);
-    }
-    else if (command == "MAGENTA") {
-      setCouleur(true, false, true);
-    }
-    else if (command == "BLANC") {
-      setCouleur(true, true, true);
-    }
-    else {
-      eteindreTout();
-    }
+    if (command == "ROUGE")      setCouleur(true, false, false);
+    else if (command == "VERT")  setCouleur(false, true, false);
+    else if (command == "BLEU")  setCouleur(false, false, true);
+    else if (command == "JAUNE") setCouleur(true, true, false);
+    else if (command == "CYAN")  setCouleur(false, true, true);
+    else if (command == "MAGENTA") setCouleur(true, false, true);
+    else if (command == "BLANC") setCouleur(true, true, true);
+    else eteindreTout();
   }
 }
