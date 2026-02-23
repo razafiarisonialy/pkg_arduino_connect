@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            "py_pub_node=pkg_arduino_connect.arduino_pub:main"
         ],
     },
 )
