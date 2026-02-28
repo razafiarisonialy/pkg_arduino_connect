@@ -1,66 +1,52 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-import serial
+import threading
 import time
 
-class ArduinoPublisher(Node):
-
+class LedColorNode(Node):
     def __init__(self):
-        super().__init__('arduino_led_pub')
-        
-        self.publisher_ = self.create_publisher(String, 'arduino_led', 10)
-        
-        #arduino serial
-        arduino_serial = '/dev/ttyACM0'
-        baudrate = 115200
-        timer_period = 0.1
-        try:
-            self.ser = serial.Serial(arduino_serial, baudrate, timeout=1)
-            time.sleep(2)  # Attendre reset Arduino
-            self.get_logger().info("Arduino connecté")
+        super().__init__('led_color_node')
 
-        except serial.SerialException as e:
-            self.get_logger().error(f"Connexion échouée: {e}")
-            self.ser = None
+        self.pub_led = self.create_publisher(String, 'arduino_led_cmd', 10)
 
-        self.colors = ["ROUGE", "VERT", "BLEU", "JAUNE", "CYAN", "MAGENTA", "BLANC"]
-        self.i = 0
-        self.timer = self.create_timer(timer_period, self.publisher_callback)
+        self.colors_valides = ["ROUGE", "VERT", "BLEU", "JAUNE", "CYAN", "MAGENTA", "BLANC", "OFF"]
 
-    def publisher_callback(self):
-        cmd = self.colors[self.i]
-        self.i = (self.i + 1) % len(self.colors)
+        self.input_thread = threading.Thread(target=self.input_loop, daemon=True)
+        self.input_thread.start()
 
-        msg = String()
-        msg.data = cmd
-        self.publisher_.publish(msg)
+        self.get_logger().info("LedColorNode démarré")
+        self.get_logger().info(f"Couleurs disponibles: {self.colors_valides}")
 
-        try:
-            if self.ser and self.ser.is_open:
-                self.ser.write((cmd + "\n").encode("utf-8"))
-                self.get_logger().info(f"Sent: {cmd}")
-        except serial.SerialException as e:
-            self.get_logger().warn(f"Serial error: {e}")
+    def input_loop(self):
+        while rclpy.ok():
+            try:
+                color = input("Entrer une couleur: ").upper().strip()
 
-    
+                if color in self.colors_valides:
+                    self.publish_color(color)
+                else:
+                    print(f"Couleur invalide. Choisir parmi: {self.colors_valides}")
+
+            except EOFError:
+                break
+
+    def publish_color(self, color):
+        msg      = String()
+        msg.data = color
+        self.pub_led.publish(msg)
+        self.get_logger().info(f"Couleur publiée: {color}")
+
     def destroy_node(self):
-        try:
-            if self.ser and self.ser.is_open:
-                off = "OFF"
-                self.ser.write((off + "\n").encode("utf-8"))
-                self.get_logger().info("LED éteinte")
-                time.sleep(0.1) 
-                self.ser.close()
-                self.get_logger().info("Serial port closed")
-        except serial.SerialException as e:
-            self.get_logger().error(f"Erreur Serial: {e}")
+        self.publish_color("OFF")
+        time.sleep(0.1)
+        self.get_logger().info("OFF envoyé")
         super().destroy_node()
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ArduinoPublisher()
+    node = LedColorNode()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
