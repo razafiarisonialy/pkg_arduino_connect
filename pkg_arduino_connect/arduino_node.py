@@ -13,6 +13,7 @@ class ArduinoNode(Node):
         self._init_serial()
 
         self.current_color = "OFF"
+        self.previous_color = None 
         self.create_timer(0.1, self.publisher_callback)
 
     def _init_publishers(self):
@@ -57,8 +58,13 @@ class ArduinoNode(Node):
         self.read_serial()
 
     def send_color(self):
+        if self.current_color == self.previous_color:
+            return
+        
         try:
             self.ser.write((self.current_color + "\n").encode("utf-8"))
+            self.previous_color = self.current_color
+            self.get_logger().info(f"Couleur envoyée: {self.current_color}")
         except serial.SerialException as e:
             self.get_logger().error(f"Erreur Serial write: {e}")
             self.ser = None
