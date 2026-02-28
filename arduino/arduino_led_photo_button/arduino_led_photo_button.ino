@@ -53,6 +53,7 @@ void loop() {
     else if (command == "CYAN")  setCouleur(false, true, true);
     else if (command == "MAGENTA") setCouleur(true, false, true);
     else if (command == "BLANC") setCouleur(true, true, true);
+    else if (command == "OFF")  eteindreTout(); 
     else eteindreTout();
   }
 

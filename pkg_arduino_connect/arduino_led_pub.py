@@ -45,9 +45,16 @@ class ArduinoPublisher(Node):
 
     
     def destroy_node(self):
-        if self.ser and self.ser.is_open:
-            self.ser.close()
-            self.get_logger().info("Serial port closed")
+        try:
+            if self.ser and self.ser.is_open:
+                off = "OFF"
+                self.ser.write((off + "\n").encode("utf-8"))
+                self.get_logger().info("LED éteinte")
+                time.sleep(0.1) 
+                self.ser.close()
+                self.get_logger().info("Serial port closed")
+        except serial.SerialException as e:
+            self.get_logger().error(f"Erreur Serial: {e}")
         super().destroy_node()
 
 
