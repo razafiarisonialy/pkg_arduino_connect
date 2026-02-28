@@ -8,21 +8,18 @@ class ArduinoPublisher(Node):
     def __init__(self):
         super().__init__('arduino_publisher')
         
-        self.publisher_ = self.create_publisher(String, 'cmd_arduino', 10)
+        self.publisher_ = self.create_publisher(String, 'arduino_led', 10)
         
         #arduino serial
         arduino_serial = '/dev/ttyACM0'
         baudrate = 115200
-
-        # Capture at 30fps
         timer_period = 0.03
-        # Port série (adapter selon ton PC)
         self.ser = serial.Serial(arduino_serial, baudrate, timeout=1)
-        
-        self.timer = self.create_timer(timer_period, self.publisher_callback)
+
 
         self.colors = ["ROUGE", "VERT", "BLEU", "JAUNE", "CYAN", "MAGENTA", "BLANC"]
         self.i = 0
+        self.timer = self.create_timer(timer_period, self.publisher_callback)
 
     def publisher_callback(self):
         cmd = self.colors[self.i]
@@ -35,8 +32,13 @@ class ArduinoPublisher(Node):
 
         # Arduino attend une ligne terminée par \n
         self.ser.write((cmd + "\n").encode("utf-8"))
-
         self.get_logger().info(f"Sent to Arduino: {cmd}")
+    
+    def destroy_node(self):
+        if self.ser.is_open:
+            self.ser.close()
+            self.get_logger().info("Serial port closed")
+        super().destroy_node()
 
 
 def main(args=None):
