@@ -3,14 +3,20 @@
 Package ROS2 pour la communication entre un Raspberry Pi et un Arduino.  
 Contrôle d'une LED RGB, lecture d'une photorésistance et d'un bouton.
 
+
 ---
+
+
 
 ## Prérequis
 
 - ROS2 Jazzy installé sur le Raspberry Pi: https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html
 - Arduino flashé avec le fichier `arduino_led_photo_button.ino`
 
+
 ---
+
+
 
 ## Installation
 
@@ -23,7 +29,9 @@ colcon build --packages-select pkg_arduino_connect
 source install/setup.bash
 ```
 
+
 ---
+
 
 
 ## Configuration
@@ -49,7 +57,7 @@ source install/setup.bash
 | Pin 2 | Bouton |
 
 
-### connection arduino et raspberry pi
+### Connection arduino et raspberry pi
 
 **1. Vérifier le port série :**
 ```bash
@@ -65,6 +73,8 @@ La ligne `speed` doit afficher `115200`. Si ce n'est pas le cas, vérifier que l
 
 
 ---
+
+
 
 ## Lancement
 
